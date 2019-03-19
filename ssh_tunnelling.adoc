@@ -1,7 +1,7 @@
 = TOAD - SSH Tunnelling
 :author: Norman [Norm] Dunbar
 :email: toad@dunbar-it.co.uk
-:version: 0.1
+:version: 0.2
 :date: 13 March 2019
 :doctype: report
 :media: screen
@@ -10,6 +10,8 @@
 :icons: font
 :sectnums:
 :source-highlighter: coderay
+
+// Updated. BitVise text files for ? need double backslashes on Windows paths.
 
 
 == Introduction
@@ -250,12 +252,19 @@ The command to run the 4 tunnels is:
 
 [source]
 ----
-stnlc oracle_user@CLOUD_SSH -pk=1 -c2sFile=c:\users\your_name\tunnels.txt
+stnlc oracle_user@CLOUD_SSH -pk=1 -c2sFile=c:\\users\\your_name\\tunnels.txt
 ----
+
+[IMPORTANT]
+====
+For some reason, even though this is a Windows application, the directory separators in the path to the `tunnels.txt` file _must_ be doubled up. If not, you get an error message saying that the file cannot be found.
+====
 
 The `-pk=1` indicates the 'Global 1' key that you generated or imported above. Make sure you use the correct id number. Also, if you inadvertently saved the key as 'Profile' rather than 'Global', then use `-pk=p1` if your key is 'Profile 1'.
 
-This is a slightly interactive utility, and you can exit using the `quit` command. Alternatively, if you add `-unat=y` to the command line above, you get unattended operation - in which case, CTRL-C aborts and closes the tunnels.
+This is a _slightly_ interactive utility. Any  time there is traffic on any of the opened tunnels, details will be written to the console that opened when you executed the above command. You exit, closing the tunnels, using the `quit` command. 
+
+Alternatively, if you add `-unat=y` to the command line above, you get unattended operation - in which case, CTRL-C aborts and closes the tunnels, and there is no logging on screen, of the tunnels' usage.
 
 If you now attempt to `tnsping ociprod` or any of the others, you should see a result back from the production database listener. If so, you can now open Toad and configure a new connection to the remote database but using the `tnsnames.ora` entries that connect to `localhost` instead.
 
