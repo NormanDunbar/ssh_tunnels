@@ -159,6 +159,8 @@ Once you have downloaded your desired SSH client software, see <<Introduction>> 
 
 === Tunnelling with Putty
 
+==== The Quick but Tedious Way!
+
 [source]
 ----
 putty -N -L 1234:dev.aws.cloud.com:1521 oracle_user@CLOUD_SSH 
@@ -172,6 +174,46 @@ Each one will open up a terminal window, but you cannot type into it, it is mere
 There are now 4 separate tunnels running to the required database servers. Each tunnel goes from the local port - `123n`, logs on as the `oracle_user` on the `CLOUD_SSH` server (the jumping off box), and from there to the appropriate database server - `dev.aws`, `sit.aws`, `prod.oci` or `stby.oci` - on port `1521`.
 
 If you now attempt to `tnsping awsdev` or any of the others, you should see a result back from the listener. If so, you can now open Toad and configure a new connection to the remote database but using the `tnsnames.ora` entries that connect to `localhost` instead.
+
+==== The Slow but Better way!
+
+Running a separate session for each tunnel you want to create gets a bit tedious after a while and also, fills up the screen with unusable ssh session windows. Why not create a single putty session, name it SSH_TUNNELS, and combine all your tunnels into one session?
+
+* Start putty as normal;
+* On the Connection->ssh->Tunnels dialogue, add your required tunnels, one by one, by:
+** Filling in the local port (1234, 1235, 1236 etc) in the Source Port edit field;
+** Filling in the destination host and port (dev.aws.cloud.com:1521 etc) in the Destination edit field;
+** Clicking the `Add` button;
+* On the SSH->Auth dialogue page, click the `Browse` button and navigate to, and select your _private_ putty keyfile;
+* On the Session tab, fill in the user_name and Host Name for the jump-off box you are using (oracle_user@CLOUD_SSH);
+* Make sure the session type is `SSH`.
+* Type the name, SSH_TUNNELS, in the Saved Sessions edit field;
+* Click the `Save` button.
+
+Now you simply click the `open` button and one screen will appear and announce that it is 'authenticating with public key "whatever"' - but not much else. You can check if the tunnel(s) are open by opening a command window and:
+
+[source,text]
+----
+netstat -a | find "123"
+
+  Proto  Local Address          Foreign Address        State
+...
+  TCP    127.0.0.1:1234         MY_PC_NAME:0        LISTENING
+  TCP    127.0.0.1:1235         MY_PC_NAME:0        LISTENING
+  TCP    127.0.0.1:1237         MY_PC_NAME:0        LISTENING
+  TCP    127.0.0.1:1238         MY_PC_NAME:0        LISTENING
+...
+----  
+
+On subsequent occasions, all you have to do is run this in a batch file, desktop shortcut or a command line session:
+
+[source,text]
+----
+putty -load SSH_TUNNELS
+----
+
+and all the tunnels you added will be up and running for you.
+
 
 === Tunnelling with MobaXterm
 
